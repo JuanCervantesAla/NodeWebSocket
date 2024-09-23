@@ -1,28 +1,41 @@
-var express = require('express');//Creating express var just to import express
-var socket = require('socket.io');//Imports socket.io
+var express = require('express'); // Importar express
+var socket = require('socket.io'); // Importar socket.io
+var cors = require('cors'); // Importar cors
 
-//App setup
-var app = express();// app that will allow to set express
-var server = app.listen(4443, function(){//setting up the port i want my app listen to
+// App setup
+var app = express(); // Crear instancia de express
 
-    console.log('listening on request on port 4443');//Message
+app.use(cors({
+    origin: "https://tu-frontend-url.com", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+}));
 
+// Static files
+app.use(express.static('public'));
+
+// Configurar el puerto usando la variable de entorno PORT o 4443 por defecto
+var PORT = process.env.PORT || 4443;
+var server = app.listen(PORT, function(){
+    console.log('listening on port ' + PORT);
 });
 
-//Static files
-app.use(express.static('public'));//Make express to look up for public folder that contains index
+// Socket setup
+var io = socket(server, {
+    cors: {
+        origin: "https://tu-frontend-url.com",
+        methods: ["GET", "POST"]
+    }
+});
 
-//Socket setup
-var io = socket(server);//Setting the socket function on the server created, will wait for a connection to a socket
-io.on('connection', function(socket){//passing on connection the socket
-    console.log('Connected to the super socket', socket.id);//Message
+io.on('connection', function(socket){
+    console.log('Connected to the super socket', socket.id); // Mensaje de conexión
 
-    socket.on('chat',function(data){
-        io.sockets.emit('chat', data);
+    socket.on('chat', function(data){
+        io.sockets.emit('chat', data); // Emitir mensaje a todos los clientes
     });
 
     socket.on('typing', function(data){
-        socket.broadcast.emit('typing',data);
+        socket.broadcast.emit('typing', data); // Emitir evento de typing a otros clientes
     });
-
 });

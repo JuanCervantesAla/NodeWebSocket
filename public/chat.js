@@ -1,5 +1,5 @@
 //Make connection
-var socket = io.connect('http://localhost:4443');
+const socket = io(); // Conectar al mismo origen
 
 //Query dom
 var message =  document.getElementById('message');
